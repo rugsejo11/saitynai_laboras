@@ -24,15 +24,15 @@ class ProductsController extends Controller
 
     public function indexProduct($id)
     {
-        $products = Product::where('id', $id)->get();
-        if($products->isEmpty())
+        $product = Product::where('id', $id)->get(); //Ieškom objekto su $id
+        if($product->isEmpty())
         {
-            abort(404);
+            abort(404); // Neradus objekto išvedam 404 klaidą
         }
         else
         {
         $response =[
-                'products'=>$products
+                'product'=>$product
             ];
             return response()->json($response);
         }
