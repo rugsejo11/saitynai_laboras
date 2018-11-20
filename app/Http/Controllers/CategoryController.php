@@ -10,7 +10,7 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\createResponse
      */
     public function index()
     {
@@ -41,11 +41,15 @@ class CategoryController extends Controller
      */
     public function create(Request $request)
     {
-        $category = new Category();
-        $category->name = $request->input('name');
+        if ($request->user()->role == "admin") {
+            $category = new Category();
+            $category->name = $request->input('name');
+            $category->save();
+            return response('Kategorija sukurta')->header('Content-type','text/plain');
+        } else {
+            return response('Priega uždrausta')->header('Content-type','text/plain');
+        }
 
-        $category->save();
-        return response('Kategorija sukurta')->header('Content-type','text/plain');
     }
 
     /**
@@ -90,18 +94,23 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        $old_category = clone $category;
-        $category->name = $request->input('name');
-        $category->price = $request->input('price');
-        $category->image = $request->input('image');
-        $category->description = $request->input('description');
 
-        $category->save();
-        $response = [
-            'old_category'=>$old_category,
-            'new_category'=>$category
-        ];
-        return response()->json($response);
+        if ($request->user()->role == "admin") {
+            $old_category = clone $category;
+            $category->name = $request->input('name');
+            $category->price = $request->input('price');
+            $category->image = $request->input('image');
+            $category->description = $request->input('description');
+    
+            $category->save();
+            $response = [
+                'old_category'=>$old_category,
+                'new_category'=>$category
+            ];
+            return response()->json($response);
+        } else {
+            return response('Priega uždrausta')->header('Content-type','text/plain');
+        }
     }
 
     /**
@@ -112,7 +121,12 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        $category->delete();
-        return response('Kategorija ištrinta')->header('Content-type','text/plain');
+        if ($request->user()->role == "admin") {
+            $category->delete();
+            return response('Kategorija ištrinta')->header('Content-type','text/plain');
+        } else {
+            return response('Priega uždrausta')->header('Content-type','text/plain');
+        }
+
     }
 }

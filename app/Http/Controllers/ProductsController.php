@@ -56,15 +56,20 @@ class ProductsController extends Controller
 
     public function create(Request $request, Category $category)
     {
-        $product = new Product();
-        $product->name = $request->input('name');
-        $product->category_id = $category->id;
-        $product->price = $request->input('price');
-        $product->image = $request->input('image');
-        $product->description = $request->input('description');
+        if ($request->user()->role == "admin") {
 
-        $product->save();
-        return response('Produktas sukurtas')->header('Content-type','text/plain');
+            $product = new Product();
+            $product->name = $request->input('name');
+            $product->category_id = $category->id;
+            $product->price = $request->input('price');
+            $product->image = $request->input('image');
+            $product->description = $request->input('description');
+    
+            $product->save();
+            return response('Produktas sukurtas')->header('Content-type','text/plain');
+        } else {
+            return response('Priega uždrausta')->header('Content-type','text/plain');
+        }
     }
 
     // public function create(Request $request)
@@ -122,39 +127,26 @@ class ProductsController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-    
-        $old_product = clone $product;
-        $product->name = $request->input('name');
-        $product->category_id = $request->input('category');
-        $product->price = $request->input('price');
-        $product->image = $request->input('image');
-        $product->description = $request->input('description');
+        if ($request->user()->role == "admin") {
 
-        $product->save();
-        $response = [
-            'old_product'=>$old_product,
-            'new_product'=>$product
-        ];
-        return response()->json($response);
+            $old_product = clone $product;
+            $product->name = $request->input('name');
+            $product->category_id = $request->input('category');
+            $product->price = $request->input('price');
+            $product->image = $request->input('image');
+            $product->description = $request->input('description');
+    
+            $product->save();
+            $response = [
+                'old_product'=>$old_product,
+                'new_product'=>$product
+            ];
+            return response()->json($response);
+            return response('Produktas atnaujintas')->header('Content-type','text/plain');
+        } else {
+            return response('Priega uždrausta')->header('Content-type','text/plain');
+        }
     }
-
-    // public function update(Request $request, Product $product)
-    // {
-    
-    //     $old_product = clone $product;
-    //     $product->name = $request->input('name');
-    //     $product->category = $request->input('category');
-    //     $product->price = $request->input('price');
-    //     $product->image = $request->input('image');
-    //     $product->description = $request->input('description');
-
-    //     $product->save();
-    //     $response = [
-    //         'old_product'=>$old_product,
-    //         'new_product'=>$product
-    //     ];
-    //     return response()->json($response);
-    // }
 
     /**
      * Remove the specified resource from storage.
@@ -164,7 +156,11 @@ class ProductsController extends Controller
      */
     public function destroy(Product $product)
     {
-        $product->delete();
-        return response('Produktas ištrintas')->header('Content-type','text/plain');
+        if ($request->user()->role == "admin") {
+            $product->delete();
+            return response('Produktas ištrintas')->header('Content-type','text/plain');
+        } else {
+            return response('Priega uždrausta')->header('Content-type','text/plain');
+        }
     }
 }
